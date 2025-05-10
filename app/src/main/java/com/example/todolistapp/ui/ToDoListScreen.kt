@@ -20,13 +20,19 @@ import androidx.compose.ui.unit.dp
 import com.example.todolistapp.data.Task
 import com.example.todolistapp.ui.theme.ToDoListAppTheme
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import com.example.todolistapp.data.DataSource
+import androidx.compose.material3.Icon
 
 @Composable
-fun ToDoListScreen(modifier: Modifier = Modifier) {
+fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) {
+    var showDeleteDialog by remember { mutableStateOf(false) }// State to control the visibility of the delete dialog
+    var taskToDelete: Task? by remember { mutableStateOf(null) } // State to hold the task to delete
     Surface(
         modifier = modifier
             .padding(8.dp)
@@ -41,8 +47,11 @@ fun ToDoListScreen(modifier: Modifier = Modifier) {
                 ) { task ->
                     TaskItem(
                         task = task,
-                        onEditClick = {},
-                        onDelete = {},
+                        onEditClick = {onEdit(task)},
+                        onDelete = {
+                            showDeleteDialog = true
+                            taskToDelete = task
+                        },
                         onCheckedChange = {
                             // Handle checkbox state change
                             // For example, update the task's isCompleted property
@@ -54,7 +63,6 @@ fun ToDoListScreen(modifier: Modifier = Modifier) {
             }
         }
     }
-
 }
 
 @Preview
@@ -82,7 +90,7 @@ fun TaskItem(
             .padding(8.dp)
             .combinedClickable(
                 onClick = { expanded = !expanded },
-                onLongClick = { /* Handle long click */ }
+                onLongClick = onDelete
             ),
         color = if (task.isCompleted) {
             //MaterialTheme.colorScheme.
@@ -93,11 +101,22 @@ fun TaskItem(
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 4.dp
     ) {
+        /* -------CHECKBOX-------- */
         Checkbox(
             checked = task.isCompleted,
             onCheckedChange = {onCheckedChange(it)}
         )
-        // Contents here
+        /*-------------------- icon edit task -----------------*/
+        IconButton(
+            onClick = onEditClick,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.TwoTone.Edit,
+                contentDescription = "Edit Task",
+                //tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 
 }
