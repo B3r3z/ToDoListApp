@@ -4,6 +4,7 @@ package com.example.todolistapp.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import com.example.todolistapp.data.DataSource
 import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
 
 @Composable
 fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) {
@@ -101,22 +103,23 @@ fun TaskItem(
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 4.dp
     ) {
-        /* -------CHECKBOX-------- */
-        Checkbox(
-            checked = task.isCompleted,
-            onCheckedChange = {onCheckedChange(it)}
-        )
-        /*-------------------- icon edit task -----------------*/
-        IconButton(
-            onClick = onEditClick,
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.TwoTone.Edit,
-                contentDescription = "Edit Task",
-                //tint = MaterialTheme.colorScheme.primary
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            /* -------CHECKBOX-------- */
+            Checkbox(
+                checked = task.isCompleted,
+                onCheckedChange = { onCheckedChange(it) }
             )
+            /*-------------------- icon edit task -----------------*/
+            IconButton(
+                onClick = onEditClick,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.TwoTone.Edit,
+                    contentDescription = "Edit Task",
+                    //tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
-
 }
