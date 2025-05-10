@@ -1,11 +1,16 @@
 package com.example.todolistapp.data
+
+import androidx.compose.runtime.mutableStateListOf
+import java.util.Collections.addAll
+
 /**
  * A simple object to hold the list of tasks and allows for creating dummy content.
  * It will be replaced by a database later on.
  */
 object DataSource {
     /** A list of tasks. */
-    private val tasks = mutableListOf<Task>().apply { addAll(getDummyContent(2)) }
+    //private val tasks = mutableListOf<Task>().apply { addAll(getDummyContent(2)) }
+    private val tasks = mutableStateListOf<Task>().apply { addAll(getDummyContent(3)) }
     /**
      * Get a list of tasks with dummy content.
      * @param numElements the number of tasks to generate

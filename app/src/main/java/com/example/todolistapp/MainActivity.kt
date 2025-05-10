@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.todolistapp.ui.theme.ToDoListAppTheme
+import com.example.todolistapp.ui.ToDoListScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +20,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDoListAppTheme {
-
+                Scaffold { innerPadding ->
+                    ToDoListScreen(modifier = Modifier.padding(innerPadding))
+                    }
             }
         }
     }
