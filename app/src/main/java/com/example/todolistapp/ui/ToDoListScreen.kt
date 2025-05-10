@@ -23,13 +23,18 @@ import com.example.todolistapp.ui.theme.ToDoListAppTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import com.example.todolistapp.data.DataSource
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import com.example.todolistapp.R
 
 @Composable
 fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) {
@@ -63,6 +68,22 @@ fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) 
                     )
                 }
             }
+            if(showDeleteDialog && taskToDelete != null) {
+                DeleteConfirmationDialog(
+                    task= taskToDelete!!,
+                    onConfirm = {
+                        // Handle task deletion
+                        DataSource.deleteTask(taskToDelete!!)
+                        showDeleteDialog = false
+                        taskToDelete = null
+                    },
+                    onDismiss= {
+                        // Dismiss the dialog without deleting
+                        showDeleteDialog = false
+                        taskToDelete = null
+                    }
+                )
+            }
         }
     }
 }
@@ -92,11 +113,11 @@ fun TaskItem(
             .padding(8.dp)
             .combinedClickable(
                 onClick = { expanded = !expanded },
-                onLongClick = onDelete
+                onLongClick = onDelete // Long click to delete
             ),
         color = if (task.isCompleted) {
             //MaterialTheme.colorScheme.
-            Color.Green
+            Color.DarkGray
         } else {
             MaterialTheme.colorScheme.surface
         },
@@ -117,9 +138,44 @@ fun TaskItem(
                 Icon(
                     imageVector = Icons.TwoTone.Edit,
                     contentDescription = "Edit Task",
-                    //tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
+    }
+}
+
+@Composable
+fun DeleteConfirmationDialog(
+    task: Task,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss, // Dismiss the dialog when the user clicks outside of it
+        title = { Text(stringResource(R.string.delete_task_title)) },
+        text = { Text(stringResource(R.string.delete_msg, task.name)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.delete), color = Color.Red)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel),color = Color.Gray)
+            }
+        }
+    )
+}
+
+@Preview
+@Composable
+fun DeleteConfirmationDialogPreview() {
+    ToDoListAppTheme {
+        DeleteConfirmationDialog(
+            task = Task("Task 1", "Description of task 1"),
+            onConfirm = {},
+            onDismiss = {}
+        )
     }
 }
