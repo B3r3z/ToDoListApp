@@ -4,4 +4,10 @@
     <string name="delete_msg">Are you sure?</string>
     <string name="delete">delete</string>
     <string name="cancel">Cancel</string>
+    <string name="clear_content_description">Clear content</string>
+    <string name="name_label">name</string>
+    <string name="name_required">name required</string>
+    <string name="description_label">Description</string>
+    <string name="important_switch">Important</string>
+    <string name="save">Save</string>
 </resources>
