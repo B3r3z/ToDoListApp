@@ -60,7 +60,9 @@ fun AddEditScreen(
     var isImportant   by remember { mutableStateOf(task?.isImportant == true) }
     var validationErr by remember { mutableStateOf(false) }
 
-    Column() {
+    Column(modifier = modifier
+            .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextFieldWithClearAndError(
             value = name,
             onValueChange = {
@@ -69,7 +71,8 @@ fun AddEditScreen(
             },
             label = stringResource(R.string.name_label),
             errorMessage = stringResource(R.string.name_required),
-            isError = validationErr
+            isError = validationErr,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.padding(8.dp))
@@ -84,7 +87,7 @@ fun AddEditScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.padding(8.dp))
+       // Spacer(Modifier.padding(8.dp))
 
        // SwitchWithText(
        //     text = stringResource(R.string.important_switch),
@@ -94,7 +97,8 @@ fun AddEditScreen(
        // )
         SwitchWithText(
             text = stringResource(R.string.important_switch),
-            checked = isImportant
+            checked = isImportant,
+            modifier = Modifier.fillMaxWidth(),
         ) { isImportant = it }
 
         /* ─────  PRZYCISKI  ───── */

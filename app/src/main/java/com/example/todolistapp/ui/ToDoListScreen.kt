@@ -116,29 +116,50 @@ fun TaskItem(
                 onLongClick = onDelete // Long click to delete
             ),
         color = if (task.isCompleted) {
-            //MaterialTheme.colorScheme.
-            Color.DarkGray
+            Color.DarkGray // Consider using MaterialTheme.colorScheme for consistency
         } else {
             MaterialTheme.colorScheme.surface
         },
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 4.dp
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            /* -------CHECKBOX-------- */
-            Checkbox(
-                checked = task.isCompleted,
-                onCheckedChange = { onCheckedChange(it) }
-            )
-            /*-------------------- icon edit task -----------------*/
-            IconButton(
-                onClick = onEditClick,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.TwoTone.Edit,
-                    contentDescription = "Edit Task",
-                    tint = MaterialTheme.colorScheme.primary
+        Column( // Changed from Row to Column
+            modifier = Modifier.padding(8.dp) // Added padding to the Column
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                /* -------CHECKBOX-------- */
+                Checkbox(
+                    checked = task.isCompleted,
+                    onCheckedChange = { onCheckedChange(it) }
+                )
+                /*-------------------- icon edit task -----------------*/
+                IconButton(
+                    onClick = onEditClick,
+                    // modifier = Modifier.padding(8.dp) // Padding can be adjusted or removed if Column padding is sufficient
+                ) {
+                    Icon(
+                        imageVector = Icons.TwoTone.Edit,
+                        contentDescription = "Edit Task",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                /*-------------------- task name -----------------*/
+                Text(
+                    text = task.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .weight(1f) // Take up remaining space in this Row
+                        .padding(start = 8.dp)
+                )
+            }
+            /*-------------------- task description -----------------*/
+            if (expanded) {
+                Text(
+                    text = task.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .fillMaxWidth() // Description takes full width
+                        .padding(start = 8.dp, top = 4.dp, end = 8.dp, bottom = 8.dp) // Padding for the description
                 )
             }
         }
