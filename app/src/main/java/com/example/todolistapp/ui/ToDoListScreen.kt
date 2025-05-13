@@ -32,14 +32,23 @@ import com.example.todolistapp.data.DataSource
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.example.todolistapp.R
+import com.example.todolistapp.database.ToDoRepository
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) {
+fun ToDoListScreen(modifier: Modifier = Modifier,
+                   onEdit: (Task) -> Unit = {},
+                   repository: ToDoRepository) {
     var showDeleteDialog by remember { mutableStateOf(false) }// State to control the visibility of the delete dialog
     var taskToDelete: Task? by remember { mutableStateOf(null) } // State to hold the task to delete
+    val tasks by repository.tasksFlow.collectAsState(initial = emptyList()) // Collecting tasks from the repository
+    Log.d("ToDoListScreen", "Tasks: $tasks") // Logging the tasks for debugging
     Surface(
         modifier = modifier
             .padding(8.dp)
@@ -50,7 +59,8 @@ fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) 
                     .padding(bottom = 8.dp)
             ) {
                 items(
-                    items = DataSource.getTasks(),
+                   // items = DataSource.getTasks(),
+                    items = tasks
                 ) { task ->
                     TaskItem(
                         task = task,
@@ -88,13 +98,7 @@ fun ToDoListScreen(modifier: Modifier = Modifier, onEdit: (Task) -> Unit = {},) 
     }
 }
 
-@Preview
-@Composable
-fun ToDoListScreenPreview() {
-    ToDoListAppTheme {
-        ToDoListScreen()
-    }
-}
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

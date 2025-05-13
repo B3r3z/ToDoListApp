@@ -17,7 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,8 +31,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.todolistapp.data.DataSource
+import com.example.todolistapp.database.ToDoRepository
 import com.example.todolistapp.ui.AddEditScreen
 import com.example.todolistapp.ui.ToDoListScreen
+import kotlinx.coroutines.launch
 
 enum class ToDoAppDestinations(@StringRes val title: Int) {
     List(title = R.string.list_screen_title),
@@ -40,6 +44,7 @@ enum class ToDoAppDestinations(@StringRes val title: Int) {
 
 @Composable
 fun ToDoListApp(
+    repository: ToDoRepository, // Repozytorium do przechowywania danych
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController() // Kontroler nawigacji Jetpack Compose
 ) {
@@ -53,7 +58,7 @@ fun ToDoListApp(
     val currentScreen = ToDoAppDestinations.valueOf(
         screenName ?: ToDoAppDestinations.List.name
     )
-
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             ToDoListTopBar(
@@ -81,13 +86,18 @@ fun ToDoListApp(
         ) {
             composable(route = ToDoAppDestinations.List.name) {
                 ToDoListScreen(
-                    onEdit = { taskToEdit -> navController.navigate(ToDoAppDestinations.Edit.name + "/${taskToEdit.taskId}") },
+                    //onEdit = { taskToEdit -> navController.navigate(ToDoAppDestinations.Edit.name + "/${taskToEdit.taskId}") },
+                    repository = repository,
+                    onEdit = {taskToEdit -> navController.navigate(ToDoAppDestinations.Edit.name + "/${taskToEdit.taskId}")}
                 )
             }
             composable(route = ToDoAppDestinations.Add.name) {
                 AddEditScreen(
                     onSave = {
-                        DataSource.addTask(it)
+                        //DataSource.addTask(it)
+                        coroutineScope.launch {
+                            repository.addTask(it)
+                        }
                         navController.navigateUp()
                     },
                     onCancel = { navController.navigateUp() }
@@ -111,7 +121,10 @@ fun ToDoListApp(
                 AddEditScreen(
                     task = task,
                     onSave = {
-                        DataSource.updateTask(it)
+                        //DataSource.updateTask(it)
+                        coroutineScope.launch {
+                            repository.updateTask(it)
+                        }
                         navController.navigateUp()
                     },
                     onCancel = { navController.navigateUp() }
@@ -145,5 +158,5 @@ fun ToDoListTopBar(
 @Preview
 @Composable
 fun ToDoListAppPreview() {
-    ToDoListApp()
+    ToDoListApp(repository = (LocalContext.current.applicationContext as ToDoListApplication).toDoRepository)
 }

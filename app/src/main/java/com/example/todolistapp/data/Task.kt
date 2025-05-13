@@ -3,7 +3,7 @@ package com.example.todolistapp.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "tasks")
+@Entity(tableName = "tasks_table")
 /**
 * Data class representing a task. Data classes are special classes in Kotlin that are used to
 * represent data, the benefits of using a data class are that it automatically generates

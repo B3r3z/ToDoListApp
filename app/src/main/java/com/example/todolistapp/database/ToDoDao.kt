@@ -41,7 +41,7 @@ interface ToDoDao {
      * automatically updated when the underlying data changes and can trigger recompositions.
      * @return a [Flow] of list of tasks
      */
-    @Query("SELECT * FROM tasks")
+    @Query("SELECT * FROM tasks_table")
     // @QUERY annotation specifies the SQL query to get all tasks (*) from the todo_tasks table
     fun getAllTasks(): Flow<List<Task>>
 
@@ -51,7 +51,7 @@ interface ToDoDao {
      * @param taskId the ID of the task to get
      * @return a [Flow] of a task
      */
-    @Query("SELECT * FROM tasks WHERE taskId = :taskId")
+    @Query("SELECT * FROM tasks_table WHERE taskId = :taskId")
     // WHERE in the SQL query allows to filter the tasks by the taskId column. The :taskId is a
     // placeholder that will be replaced by the actual taskId value when the query is executed.
     fun getTaskById(taskId: Long): Flow<Task?>

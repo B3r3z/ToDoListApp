@@ -20,7 +20,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDoListAppTheme {
-                ToDoListApp()
+                val repository = (application as ToDoListApplication).toDoRepository
+                ToDoListApp(repository)
             }
         }
     }
