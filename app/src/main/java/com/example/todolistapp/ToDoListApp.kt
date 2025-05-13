@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -30,7 +31,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.todolistapp.data.DataSource
 import com.example.todolistapp.database.ToDoRepository
 import com.example.todolistapp.ui.AddEditScreen
 import com.example.todolistapp.ui.ToDoListScreen
@@ -44,17 +44,12 @@ enum class ToDoAppDestinations(@StringRes val title: Int) {
 
 @Composable
 fun ToDoListApp(
-    repository: ToDoRepository, // Repozytorium do przechowywania danych
+    repository: ToDoRepository,
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController() // Kontroler nawigacji Jetpack Compose
+    navController: NavHostController = rememberNavController()
 ) {
-    // Pobiera bieżący wpis stosu wstecznego jako stan, aby interfejs użytkownika mógł reagować na zmiany nawigacji
     val backStackEntry by navController.currentBackStackEntryAsState()
-
-    // Wyodrębnia nazwę ekranu z trasy. Usuwa wszelkie argumenty po "/", np. "Edit/{taskId}" staje się "Edit"
     val screenName = backStackEntry?.destination?.route?.substringBefore("/")
-
-    // Określa bieżący ekran na podstawie nazwy trasy. Domyślnie ustawia na List, jeśli nazwa ekranu jest null (np. przy pierwszym uruchomieniu)
     val currentScreen = ToDoAppDestinations.valueOf(
         screenName ?: ToDoAppDestinations.List.name
     )
@@ -65,7 +60,7 @@ fun ToDoListApp(
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 navigateUp = { navController.navigateUp() },
-                modifier = modifier.padding(start = 8.dp, end = 8.dp)
+                modifier = modifier
             )
         },
         floatingActionButton = {
@@ -86,15 +81,13 @@ fun ToDoListApp(
         ) {
             composable(route = ToDoAppDestinations.List.name) {
                 ToDoListScreen(
-                    //onEdit = { taskToEdit -> navController.navigate(ToDoAppDestinations.Edit.name + "/${taskToEdit.taskId}") },
                     repository = repository,
-                    onEdit = {taskToEdit -> navController.navigate(ToDoAppDestinations.Edit.name + "/${taskToEdit.taskId}")}
+                    onEdit = { taskToEdit -> navController.navigate(ToDoAppDestinations.Edit.name + "/${taskToEdit.taskId}") }
                 )
             }
             composable(route = ToDoAppDestinations.Add.name) {
                 AddEditScreen(
                     onSave = {
-                        //DataSource.addTask(it)
                         coroutineScope.launch {
                             repository.addTask(it)
                         }
@@ -103,32 +96,34 @@ fun ToDoListApp(
                     onCancel = { navController.navigateUp() }
                 )
             }
-            composable(route = ToDoAppDestinations.Edit.name) {
-                AddEditScreen(
-                    task = null,
-                    onSave = {},
-                    onCancel = {}
-                )
-            }
             composable(route = ToDoAppDestinations.Edit.name + "/{taskToEditId}",
                 arguments = listOf(navArgument(name = "taskToEditId") {
                     type = NavType.LongType
                 }))
             { backStackEntry ->
                 val taskToEditId = backStackEntry.arguments?.getLong("taskToEditId")
-                taskToEditId ?: return@composable
-                val task = DataSource.getTask(taskToEditId)
-                AddEditScreen(
-                    task = task,
-                    onSave = {
-                        //DataSource.updateTask(it)
-                        coroutineScope.launch {
-                            repository.updateTask(it)
-                        }
-                        navController.navigateUp()
-                    },
-                    onCancel = { navController.navigateUp() }
-                )
+                if (taskToEditId == null) {
+                    navController.navigateUp()
+                    return@composable
+                }
+
+                val taskToEditState by repository.getTaskById(taskToEditId).collectAsState(initial = null)
+
+                taskToEditState?.let { task ->
+                    AddEditScreen(
+                        task = task,
+                        onSave = { updatedTask ->
+                            coroutineScope.launch {
+                                repository.updateTask(updatedTask)
+                            }
+                            navController.navigateUp()
+                        },
+                        onCancel = { navController.navigateUp() }
+                    )
+                } ?: run {
+                    // Optional: Display loading indicator or message when taskToEditState is null
+                    // Text("Loading task...")
+                }
             }
         }
     }
@@ -151,7 +146,7 @@ fun ToDoListTopBar(
                 }
             }
         },
-        modifier = modifier.padding(start = 8.dp, end = 8.dp)
+        modifier = modifier
     )
 }
 

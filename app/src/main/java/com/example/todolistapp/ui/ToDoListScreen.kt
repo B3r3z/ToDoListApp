@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,20 +28,17 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.Color
-import com.example.todolistapp.data.DataSource
+import android.util.Log
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
-import androidx.media3.common.util.Log
-import androidx.media3.common.util.UnstableApi
 import com.example.todolistapp.R
 import com.example.todolistapp.database.ToDoRepository
+import kotlinx.coroutines.launch
 
-@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun ToDoListScreen(modifier: Modifier = Modifier,
                    onEdit: (Task) -> Unit = {},
@@ -49,6 +47,8 @@ fun ToDoListScreen(modifier: Modifier = Modifier,
     var taskToDelete: Task? by remember { mutableStateOf(null) } // State to hold the task to delete
     val tasks by repository.tasksFlow.collectAsState(initial = emptyList()) // Collecting tasks from the repository
     Log.d("ToDoListScreen", "Tasks: $tasks") // Logging the tasks for debugging
+    val coroutineScope = rememberCoroutineScope() // CoroutineScope dla operacji na repozytorium
+
     Surface(
         modifier = modifier
             .padding(8.dp)
@@ -59,7 +59,6 @@ fun ToDoListScreen(modifier: Modifier = Modifier,
                     .padding(bottom = 8.dp)
             ) {
                 items(
-                   // items = DataSource.getTasks(),
                     items = tasks
                 ) { task ->
                     TaskItem(
@@ -69,11 +68,10 @@ fun ToDoListScreen(modifier: Modifier = Modifier,
                             showDeleteDialog = true
                             taskToDelete = task
                         },
-                        onCheckedChange = {
-                            // Handle checkbox state change
-                            // For example, update the task's isCompleted property
-                            // DataSource.updateTask(task.copy(isCompleted = it))
-                            DataSource.updateTask(task.copy(isCompleted = it))
+                        onCheckedChange = { isChecked ->
+                            coroutineScope.launch {
+                                repository.updateTask(task.copy(isCompleted = isChecked))
+                            }
                         }
                     )
                 }
@@ -82,8 +80,9 @@ fun ToDoListScreen(modifier: Modifier = Modifier,
                 DeleteConfirmationDialog(
                     task= taskToDelete!!,
                     onConfirm = {
-                        // Handle task deletion
-                        DataSource.deleteTask(taskToDelete!!)
+                        coroutineScope.launch {
+                            repository.deleteTask(taskToDelete!!)
+                        }
                         showDeleteDialog = false
                         taskToDelete = null
                     },
@@ -97,8 +96,6 @@ fun ToDoListScreen(modifier: Modifier = Modifier,
         }
     }
 }
-
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -120,7 +117,7 @@ fun TaskItem(
                 onLongClick = onDelete // Long click to delete
             ),
         color = if (task.isCompleted) {
-            Color.DarkGray // Consider using MaterialTheme.colorScheme for consistency
+            MaterialTheme.colorScheme.surfaceVariant // Użycie koloru z motywu
         } else {
             MaterialTheme.colorScheme.surface
         },
@@ -138,8 +135,7 @@ fun TaskItem(
                 )
                 /*-------------------- icon edit task -----------------*/
                 IconButton(
-                    onClick = onEditClick,
-                    // modifier = Modifier.padding(8.dp) // Padding can be adjusted or removed if Column padding is sufficient
+                    onClick = onEditClick
                 ) {
                     Icon(
                         imageVector = Icons.TwoTone.Edit,
@@ -182,12 +178,12 @@ fun DeleteConfirmationDialog(
         text = { Text(stringResource(R.string.delete_msg, task.name)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.delete), color = Color.Red)
+                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel),color = Color.Gray)
+                Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
         }
     )
@@ -204,3 +200,4 @@ fun DeleteConfirmationDialogPreview() {
         )
     }
 }
+
