@@ -10,4 +10,7 @@
     <string name="description_label">Description</string>
     <string name="important_switch">Important</string>
     <string name="save">Save</string>
+    <string name="list_screen_title">Main list</string>
+    <string name="add_screen_title">add task\n</string>
+    <string name="edit_screen_title">Edit task</string>
 </resources>
